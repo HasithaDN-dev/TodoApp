@@ -3,8 +3,12 @@ package com.example.todo.repository;
 import com.example.todo.model.Todo;
 import com.example.todo.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo> findByUserOrderByCreatedAtDesc(User user);
+    List<Todo> findByUserAndDueDateBeforeAndCompletedFalse(User user, LocalDateTime dueDate);
+    long countByUserAndCompletedFalse(User user);
+    long countByUserAndCompletedTrue(User user);
 }

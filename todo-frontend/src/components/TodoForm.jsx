@@ -11,19 +11,61 @@ export default function TodoForm({ onAdd }) {
     onAdd({
         title: title.trim(),
         description: desc.trim() || null,
-        duedate: due ? new Date(due).toISOString().slice(0,19) : null,        
+        dueDate: due ? new Date(due).toISOString().slice(0,19) : null,        
     });
     setTitle(""); setDesc(""); setDue("");
   };
 
   return (
-    <form className="bg-white shadow-md rounded p-4 mb-4" onSubmit={submit}>
-    <h3 className="text-lg font-semibold mb-2">Add Todo</h3>
-    <input className="w-full border rounded px-2 py-1 mb-2" placeholder="Title" value={title} onChange={e=>setTitle(e.target.value)} required />
-    <textarea className="w-full border rounded px-2 py-1 mb-2" placeholder="Description" row={2} value={desc} onChange={e=>setDesc(e.target.value)} />
-    <input type="datetime-local" className="w-full border rounded px-2 py-1 mb-2" value={due} onChange={e=>setDue(e.target.value)} />
-    <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded" type="submit">Add</button>
-    </form>
+    <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h3 className="text-lg font-semibold mb-4 text-gray-800">Add New Todo</h3>
+      <form onSubmit={submit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Title *
+          </label>
+          <input 
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            placeholder="What needs to be done?" 
+            value={title} 
+            onChange={e=>setTitle(e.target.value)} 
+            required 
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea 
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            placeholder="Additional details (optional)" 
+            rows={2} 
+            value={desc} 
+            onChange={e=>setDesc(e.target.value)} 
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Due Date
+          </label>
+          <input 
+            type="datetime-local" 
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            value={due} 
+            onChange={e=>setDue(e.target.value)} 
+          />
+        </div>
+        
+        <button 
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors font-medium" 
+          type="submit"
+        >
+          Add Todo
+        </button>
+      </form>
+    </div>
   );
 }
 

@@ -1,69 +1,99 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import API from "../api/axios";
-import { setToken } from "../auth/auth";
+import { useAuth } from "../auth/auth.jsx";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [err, setErr] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const submit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErr("");
+    setError("");
+    setIsLoading(true);
+
+    console.log("Login attempt:", { email, password: password ? "***" : "empty" });
+
     try {
-      const { data } = await API.post("/auth/Login", { email, password });
-      setToken(data.token);
-      if (data.fullName) localStorage.setItem("fullName", data.fullName);
-      navigate("/todos");
-    } catch (e) {
-      setErr("Inavalid credentials");
+      const result = await login(email, password);
+      console.log("Login result:", result);
+      
+      if (result.success) {
+        console.log("Login successful, navigating to home");
+        navigate("/");
+      } else {
+        console.log("Login failed:", result.error);
+        setError(result.error);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError(error.message || "An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      <form onSubmit={submit} className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-2xl font-semibold mb-4">Login</h2>
-        {err && <div className="mb-3 text-red-600">{err}</div>}
-        <label className="block text-sm font-medium text-gray-700">Email</label>
-        <input
-          type="email"
-          className="mt-1 mb-3 w-full rounded-md border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+    <div className="max-w-md mx-auto mt-8">
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Login</h2>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
 
-        <label className="block text-sm font-medium text-gray-700">
-          Password
-        </label>
-        <input
-          type="password"
-          className="mt-1 mb-4 w-full rounded-md border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
 
-        <div className="flex items-center gap-2">
           <button
             type="submit"
-            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled={isLoading}
           >
-            Sign in
+            {isLoading ? "Signing in..." : "Sign In"}
           </button>
-          <Link to="/register">
-            <button
-              type="button"
-              className="rounded-md border px-4 py-2 hover:bg-gray-50"
-            >
-              Register
-            </button>
-          </Link>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+              Register here
+            </Link>
+          </p>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

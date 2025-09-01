@@ -1,60 +1,135 @@
-import {useState} from "react";
-import {useNavigate, Link} from "react-router-dom";
-import API from "../api/axios";
-import { setToken } from "../auth/auth";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../auth/auth.jsx";
 
 export default function Register() {
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [err, setErr] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { register } = useAuth();
 
-    const submit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setErr("");
+        setError("");
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters long");
+            return;
+        }
+
+        setIsLoading(true);
+
         try {
-            const {data} = await API.post("/auth/register", {email, password, fullName });
-            setToken(data.token);
-            if(data.fullName) localStorage.setItem("fullName", data.fullName);
-            navigate("/todos");
-        } catch (e) {
-            setErr("Registration failed");
+            const result = await register({ fullName, email, password });
+            if (result.success) {
+                navigate("/");
+            } else {
+                setError(result.error);
+            }
+        } catch (err) {
+            setError("An unexpected error occurred");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-6">
-            <form
-            onSubmit={submit}
-            className="bg-white rounded-xl shadow p-6"
-            >
-                <h2 className="text-2xl font-semibold mb-4">Create account</h2>
-                {err && <div className="mb-3 text-red-600">{err}</div>}
+        <div className="max-w-md mx-auto mt-8">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Create Account</h2>
+                
+                {error && (
+                    <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                        {error}
+                    </div>
+                )}
 
-                <label className="block text-sm font-medium text-gray-700">Full name</label>
-                <input>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Full Name
+                        </label>
+                        <input
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
 
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
 
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            disabled={isLoading}
+                            minLength={6}
+                        />
+                    </div>
 
-//  type here
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Confirm Password
+                        </label>
+                        <input
+                            type="password"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            disabled={isLoading}
+                            minLength={6}
+                        />
+                    </div>
 
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Creating Account..." : "Create Account"}
+                    </button>
+                </form>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </input>
-            </form>
+                <div className="mt-6 text-center">
+                    <p className="text-sm text-gray-600">
+                        Already have an account?{" "}
+                        <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                            Login here
+                        </Link>
+                    </p>
+                </div>
+            </div>
         </div>
-    )
+    );
 }

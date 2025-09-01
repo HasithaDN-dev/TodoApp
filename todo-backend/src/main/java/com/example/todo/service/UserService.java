@@ -20,8 +20,8 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager, JwtService jwtService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, 
+                      AuthenticationManager authenticationManager, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -39,13 +39,15 @@ public class UserService {
         u.setRole("ROLE_USER");
         userRepository.save(u);
         String token = jwtService.generateToken(u.getEmail(), Map.of("role", u.getRole()));
-        return new AuthResponse(token, u.getEmail(), u.getFullName());
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(u.getEmail(), u.getFullName());
+        return new AuthResponse(token, userInfo);
     }
 
     public AuthResponse login(LoginRequest req) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
         User u = userRepository.findByEmail(req.getEmail()).orElseThrow();
         String token = jwtService.generateToken(u.getEmail(), Map.of("role", u.getRole()));
-        return new AuthResponse(token, u.getEmail(), u.getFullName());
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(u.getEmail(), u.getFullName());
+        return new AuthResponse(token, userInfo);
     }
 }

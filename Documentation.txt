@@ -1,0 +1,879 @@
+====================================================================================================
+                                    TODO APPLICATION DOCUMENTATION
+                          Complete Beginner's Guide to Full-Stack Development
+====================================================================================================
+
+TABLE OF CONTENTS:
+1. What is this TodoApp?
+2. Technologies Used (What and Why)
+3. Application Architecture Overview
+4. Frontend (React) Explained
+5. Backend (Spring Boot) Explained
+6. Database (MariaDB) Explained
+7. Authentication System
+8. Step-by-Step Code Walkthrough
+9. How Everything Works Together
+10. Common Issues and Solutions
+
+====================================================================================================
+1. WHAT IS THIS TODOAPP?
+====================================================================================================
+
+This TodoApp is a full-stack web application that allows users to:
+- Register and login with their email and password
+- Create, read, update, and delete (CRUD) todo items
+- Mark todos as complete or incomplete
+- Set due dates for todos
+- View statistics of pending and completed todos
+
+Think of it like a digital notepad where you can write down tasks and check them off when done,
+but with user accounts so each person has their own private list.
+
+====================================================================================================
+2. TECHNOLOGIES USED (WHAT AND WHY)
+====================================================================================================
+
+FRONTEND (What the user sees and interacts with):
+- React.js: A JavaScript library for building user interfaces
+  WHY: Makes it easy to create interactive web pages with components
+- Vite: A build tool and development server
+  WHY: Faster development and building compared to older tools
+- Tailwind CSS: A utility-first CSS framework
+  WHY: Quickly style components without writing custom CSS
+- Axios: A library for making HTTP requests
+  WHY: Easier way to communicate with the backend server
+
+BACKEND (The server that handles business logic):
+- Spring Boot: A Java framework for building web applications
+  WHY: Provides structure and many built-in features for web apps
+- Spring Security: Security framework for authentication
+  WHY: Handles user login, passwords, and protecting routes
+- JPA/Hibernate: Object-Relational Mapping (ORM)
+  WHY: Lets us work with database using Java objects instead of SQL
+- JWT (JSON Web Tokens): For stateless authentication
+  WHY: Secure way to identify users without storing sessions
+
+DATABASE:
+- MariaDB: A relational database (similar to MySQL)
+  WHY: Stores user data and todos permanently
+
+====================================================================================================
+3. APPLICATION ARCHITECTURE OVERVIEW
+====================================================================================================
+
+The application follows a typical 3-tier architecture:
+
+PRESENTATION TIER (Frontend - React):
+┌─────────────────────────────────────┐
+│  Browser (React App running)       │
+│  - Login/Register pages            │
+│  - Todo list display               │
+│  - Add/Edit todo forms             │
+│  - User interactions               │
+└─────────────────────────────────────┘
+                    ↓ HTTP Requests (Axios)
+                    
+BUSINESS LOGIC TIER (Backend - Spring Boot):
+┌─────────────────────────────────────┐
+│  Server (Spring Boot App)          │
+│  - Authentication (login/register) │
+│  - Todo CRUD operations            │
+│  - Input validation                │
+│  - Security (JWT tokens)           │
+└─────────────────────────────────────┘
+                    ↓ SQL Queries (JPA)
+                    
+DATA TIER (Database - MariaDB):
+┌─────────────────────────────────────┐
+│  Database (MariaDB)                 │
+│  - users table (user accounts)     │
+│  - todos table (todo items)        │
+│  - Persistent data storage         │
+└─────────────────────────────────────┘
+
+HOW THEY COMMUNICATE:
+1. User clicks "Add Todo" in React app
+2. React sends HTTP POST request to Spring Boot server
+3. Spring Boot validates the request and saves to database
+4. Database confirms the save
+5. Spring Boot sends success response back to React
+6. React updates the UI to show the new todo
+
+====================================================================================================
+4. FRONTEND (REACT) EXPLAINED
+====================================================================================================
+
+WHAT IS REACT?
+React is a JavaScript library that lets you build user interfaces using "components".
+Think of components like LEGO blocks - each piece has a specific purpose, and you combine
+them to build something bigger.
+
+FOLDER STRUCTURE:
+todo-frontend/
+├── src/
+│   ├── components/     # Reusable UI pieces
+│   │   ├── Navbar.jsx     # Top navigation bar
+│   │   ├── TodoForm.jsx   # Form to add new todos
+│   │   └── TodoItem.jsx   # Single todo display
+│   ├── pages/          # Full page components
+│   │   ├── Login.jsx      # Login page
+│   │   ├── Register.jsx   # Registration page
+│   │   └── TodoList.jsx   # Main todo list page
+│   ├── auth/           # Authentication logic
+│   │   └── auth.jsx       # Login/logout state management
+│   ├── api/            # Server communication
+│   │   └── axios.js       # HTTP request configuration
+│   └── routes/         # Page routing
+│       └── PrivateRoute.jsx # Protected route wrapper
+
+KEY REACT CONCEPTS USED:
+
+1. COMPONENTS:
+   - Like functions that return HTML-like code (JSX)
+   - Can receive data (props) and manage their own state
+   
+2. JSX:
+   - HTML-like syntax inside JavaScript
+   - Example: <div className="text-blue-500">Hello</div>
+   
+3. STATE:
+   - Data that can change over time
+   - When state changes, React re-renders the component
+   
+4. HOOKS:
+   - Special functions that let you use React features
+   - useState: For managing component state
+   - useEffect: For side effects (like API calls)
+   - useContext: For sharing data between components
+
+====================================================================================================
+5. BACKEND (SPRING BOOT) EXPLAINED
+====================================================================================================
+
+WHAT IS SPRING BOOT?
+Spring Boot is a Java framework that makes it easy to create web applications.
+It provides a lot of built-in functionality so you don't have to write everything from scratch.
+
+FOLDER STRUCTURE:
+todo-backend/
+├── src/main/java/com/example/todo/
+│   ├── controller/     # Handle HTTP requests
+│   │   ├── AuthController.java    # Login/register endpoints
+│   │   └── TodoController.java    # Todo CRUD endpoints
+│   ├── service/        # Business logic
+│   │   ├── UserService.java       # User-related operations
+│   │   └── TodoService.java       # Todo-related operations
+│   ├── model/          # Data structures
+│   │   ├── User.java              # User entity
+│   │   └── Todo.java              # Todo entity
+│   ├── repository/     # Database access
+│   │   ├── UserRepository.java    # User database operations
+│   │   └── TodoRepository.java    # Todo database operations
+│   ├── security/       # Authentication & authorization
+│   │   ├── JwtService.java        # JWT token handling
+│   │   ├── JwtAuthenticationFilter.java  # Token validation
+│   │   └── SecurityConfig.java    # Security configuration
+│   ├── payload/        # Request/response objects
+│   │   ├── LoginRequest.java      # Login form data
+│   │   ├── RegisterRequest.java   # Registration form data
+│   │   ├── TodoRequest.java       # Todo form data
+│   │   └── AuthResponse.java      # Login response data
+│   └── config/         # Application configuration
+│       └── ApplicationConfig.java # General app settings
+
+KEY SPRING BOOT CONCEPTS:
+
+1. CONTROLLERS:
+   - Handle incoming HTTP requests
+   - Return responses to the client
+   - Like waiters in a restaurant - take orders and bring food
+   
+2. SERVICES:
+   - Contain business logic
+   - Process data and make decisions
+   - Like chefs in a restaurant - prepare the food
+   
+3. REPOSITORIES:
+   - Access the database
+   - Save, update, delete, and find data
+   - Like the storage room - keep and retrieve ingredients
+   
+4. ENTITIES:
+   - Represent database tables as Java classes
+   - Each instance is a row in the table
+   
+5. ANNOTATIONS:
+   - Special markers that tell Spring what to do
+   - @RestController: This class handles web requests
+   - @Service: This class contains business logic
+   - @Entity: This class represents a database table
+
+====================================================================================================
+6. DATABASE (MARIADB) EXPLAINED
+====================================================================================================
+
+WHAT IS A DATABASE?
+A database is like a digital filing cabinet that stores information in an organized way.
+MariaDB is a relational database, which means data is stored in tables with rows and columns.
+
+OUR DATABASE STRUCTURE:
+
+TABLE: users
+┌────┬─────────────────────┬──────────────────────┬─────────────┬─────────────┬─────────────────────┐
+│ id │ email               │ password             │ full_name   │ role        │ created_at          │
+├────┼─────────────────────┼──────────────────────┼─────────────┼─────────────┼─────────────────────┤
+│ 1  │ john@example.com    │ $2a$10$encrypted... │ John Doe    │ ROLE_USER   │ 2025-09-01 10:00:00 │
+│ 2  │ jane@example.com    │ $2a$10$encrypted... │ Jane Smith  │ ROLE_USER   │ 2025-09-01 11:00:00 │
+└────┴─────────────────────┴──────────────────────┴─────────────┴─────────────┴─────────────────────┘
+
+TABLE: todos
+┌────┬─────────┬─────────────┬──────────────────────┬─────────────────────┬───────────┬─────────────────────┬─────────────────────┐
+│ id │ user_id │ title       │ description          │ due_date            │ completed │ created_at          │ updated_at          │
+├────┼─────────┼─────────────┼──────────────────────┼─────────────────────┼───────────┼─────────────────────┼─────────────────────┤
+│ 1  │ 1       │ Buy milk    │ Get milk from store  │ 2025-09-02 18:00:00 │ false     │ 2025-09-01 10:05:00 │ 2025-09-01 10:05:00 │
+│ 2  │ 1       │ Walk dog    │ Take dog to park     │ NULL                │ true      │ 2025-09-01 10:10:00 │ 2025-09-01 15:30:00 │
+│ 3  │ 2       │ Read book   │ Finish chapter 5     │ 2025-09-03 20:00:00 │ false     │ 2025-09-01 11:05:00 │ 2025-09-01 11:05:00 │
+└────┴─────────┴─────────────┴──────────────────────┴─────────────────────┴───────────┴─────────────────────┴─────────────────────┘
+
+RELATIONSHIPS:
+- Each user can have many todos (one-to-many relationship)
+- Each todo belongs to exactly one user
+- user_id in todos table links to id in users table (foreign key)
+
+====================================================================================================
+7. AUTHENTICATION SYSTEM
+====================================================================================================
+
+WHAT IS AUTHENTICATION?
+Authentication is the process of verifying who a user is (like checking an ID card).
+Our app uses JWT (JSON Web Tokens) for authentication.
+
+HOW JWT WORKS:
+1. User logs in with email/password
+2. Server verifies credentials against database
+3. If valid, server creates a JWT token (like a temporary ID card)
+4. Token is sent back to the client
+5. Client stores token and sends it with every request
+6. Server validates token on each request
+
+JWT TOKEN STRUCTURE:
+A JWT has three parts separated by dots:
+header.payload.signature
+
+Example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huQGV4YW1wbGUuY29tIn0.signature_here
+
+AUTHENTICATION FLOW IN OUR APP:
+
+1. REGISTRATION:
+   Frontend → POST /api/auth/register → Backend
+   ├── Validate input data
+   ├── Check if email already exists
+   ├── Hash password with BCrypt
+   ├── Save user to database
+   ├── Generate JWT token
+   └── Return token + user info
+
+2. LOGIN:
+   Frontend → POST /api/auth/login → Backend
+   ├── Validate input data
+   ├── Find user by email
+   ├── Check password with BCrypt
+   ├── Generate JWT token
+   └── Return token + user info
+
+3. PROTECTED REQUESTS:
+   Frontend → GET /api/todos (with Authorization header) → Backend
+   ├── Extract token from Authorization header
+   ├── Validate token signature
+   ├── Extract user email from token
+   ├── Find user in database
+   └── Process request for that user
+
+====================================================================================================
+8. STEP-BY-STEP CODE WALKTHROUGH
+====================================================================================================
+
+Let's trace through what happens when a user logs in and adds a todo:
+
+STEP 1: USER OPENS THE APP
+────────────────────────────
+
+File: src/main.jsx (Frontend entry point)
+```javascript
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+```
+WHAT HAPPENS:
+- React starts up and renders the main App component
+- This is like opening a book to the first page
+
+File: src/App.jsx (Main app component)
+```javascript
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './auth/auth.jsx'
+import Login from './pages/Login.jsx'
+import TodoList from './pages/TodoList.jsx'
+import PrivateRoute from './routes/PrivateRoute.jsx'
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={
+            <PrivateRoute>
+              <TodoList />
+            </PrivateRoute>
+          } />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  )
+}
+```
+WHAT HAPPENS:
+- Sets up routing (different URLs show different pages)
+- Wraps everything in AuthProvider (manages login state)
+- "/" route is protected - only logged-in users can see it
+
+STEP 2: USER TRIES TO ACCESS TODOS (NOT LOGGED IN)
+──────────────────────────────────────────────────
+
+File: src/routes/PrivateRoute.jsx
+```javascript
+import { useAuth } from '../auth/auth.jsx'
+import { Navigate } from 'react-router-dom'
+
+export default function PrivateRoute({ children }) {
+    const { token } = useAuth()
+    return token ? children : <Navigate to="/login" />
+}
+```
+WHAT HAPPENS:
+- Checks if user has a valid token
+- If no token → redirect to login page
+- If has token → show the requested page (TodoList)
+
+STEP 3: USER SEES LOGIN PAGE
+────────────────────────────
+
+File: src/pages/Login.jsx
+```javascript
+import { useState } from 'react'
+import { useAuth } from '../auth/auth.jsx'
+
+export default function Login() {
+    const [formData, setFormData] = useState({ email: '', password: '' })
+    const { login } = useAuth()
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()  // Don't refresh the page
+        try {
+            await login(formData)  // Call login function
+        } catch (error) {
+            setError('Invalid email or password')
+        }
+    }
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <input 
+                type="email" 
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+            />
+            <input 
+                type="password" 
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+            />
+            <button type="submit">Sign In</button>
+        </form>
+    )
+}
+```
+WHAT HAPPENS:
+- Creates a form with email and password inputs
+- When user types, formData state is updated
+- When form is submitted, calls the login function
+
+STEP 4: LOGIN FUNCTION IS CALLED
+─────────────────────────────────
+
+File: src/auth/auth.jsx
+```javascript
+import { createContext, useContext, useState } from 'react'
+import api from '../api/axios.js'
+
+const AuthContext = createContext()
+
+export function AuthProvider({ children }) {
+    const [token, setToken] = useState(localStorage.getItem('token'))
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || 'null'))
+
+    const login = async (credentials) => {
+        const response = await api.post('/auth/login', credentials)
+        const { token, user } = response.data
+        
+        setToken(token)
+        setUser(user)
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+    }
+
+    return (
+        <AuthContext.Provider value={{ token, user, login, logout }}>
+            {children}
+        </AuthContext.Provider>
+    )
+}
+```
+WHAT HAPPENS:
+- Sends POST request to backend with email/password
+- If successful, saves token and user info
+- Stores in localStorage so user stays logged in after page refresh
+- Updates React state which triggers re-render
+
+STEP 5: HTTP REQUEST GOES TO BACKEND
+─────────────────────────────────────
+
+File: src/api/axios.js (HTTP client configuration)
+```javascript
+import axios from 'axios'
+
+const api = axios.create({
+    baseURL: 'http://localhost:8080/api'
+})
+
+// Add token to every request
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+})
+```
+WHAT HAPPENS:
+- Creates HTTP client pointing to our backend server
+- Automatically adds Authorization header with JWT token
+- Sends request to http://localhost:8080/api/auth/login
+
+STEP 6: BACKEND RECEIVES LOGIN REQUEST
+──────────────────────────────────────
+
+File: AuthController.java
+```java
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+    
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) {
+        AuthResponse response = userService.login(req);
+        return ResponseEntity.ok(response);
+    }
+}
+```
+WHAT HAPPENS:
+- @PostMapping maps POST requests to /api/auth/login to this method
+- @RequestBody converts JSON to LoginRequest object
+- Calls userService.login() to handle the business logic
+- Returns the response as JSON
+
+File: UserService.java
+```java
+@Service
+public class UserService {
+    
+    public AuthResponse login(LoginRequest req) {
+        // Step 1: Authenticate user
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                req.getEmail(), 
+                req.getPassword()
+            )
+        );
+        
+        // Step 2: Find user in database
+        User user = userRepository.findByEmail(req.getEmail()).orElseThrow();
+        
+        // Step 3: Generate JWT token
+        String token = jwtService.generateToken(
+            user.getEmail(), 
+            Map.of("role", user.getRole())
+        );
+        
+        // Step 4: Create response
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+            user.getEmail(), 
+            user.getFullName()
+        );
+        return new AuthResponse(token, userInfo);
+    }
+}
+```
+WHAT HAPPENS:
+1. authenticationManager checks if email/password is correct
+2. If wrong → throws exception → user gets error message
+3. If correct → finds user in database
+4. Generates JWT token containing user email and role
+5. Creates response object with token and user info
+
+STEP 7: USER IS NOW LOGGED IN AND SEES TODO LIST
+─────────────────────────────────────────────────
+
+Since token is now saved, PrivateRoute allows access to TodoList page.
+
+File: TodoList.jsx
+```javascript
+export default function TodoList() {
+    const [todos, setTodos] = useState([])
+    
+    useEffect(() => {
+        loadTodos()
+    }, [])
+    
+    const loadTodos = async () => {
+        const response = await api.get('/todos')
+        setTodos(response.data)
+    }
+    
+    return (
+        <div>
+            <TodoForm onAdd={addTodo} />
+            {todos.map(todo => (
+                <TodoItem key={todo.id} todo={todo} />
+            ))}
+        </div>
+    )
+}
+```
+WHAT HAPPENS:
+- useEffect runs when component loads
+- Calls loadTodos() which makes GET request to /api/todos
+- Backend returns user's todos
+- todos state is updated, causing re-render
+- Each todo is displayed using TodoItem component
+
+STEP 8: USER ADDS A NEW TODO
+────────────────────────────
+
+File: TodoForm.jsx
+```javascript
+export default function TodoForm({ onAdd }) {
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        dueDate: ''
+    })
+    
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        await onAdd(formData)  // Call parent's addTodo function
+        setFormData({ title: '', description: '', dueDate: '' })  // Clear form
+    }
+    
+    return (
+        <form onSubmit={handleSubmit}>
+            <input 
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                placeholder="Todo title"
+            />
+            <textarea 
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Description"
+            />
+            <input 
+                type="datetime-local"
+                value={formData.dueDate}
+                onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+            />
+            <button type="submit">Add Todo</button>
+        </form>
+    )
+}
+```
+WHAT HAPPENS:
+- User fills out form (title, description, due date)
+- On submit, calls onAdd function passed from parent (TodoList)
+- Form is cleared after successful submission
+
+Back in TodoList.jsx:
+```javascript
+const addTodo = async (todoData) => {
+    await api.post('/todos', todoData)
+    await loadTodos()  // Refresh the list
+}
+```
+WHAT HAPPENS:
+- Sends POST request to backend with todo data
+- After saving, reloads the todo list to show the new todo
+
+STEP 9: BACKEND HANDLES ADD TODO REQUEST
+────────────────────────────────────────
+
+File: TodoController.java
+```java
+@PostMapping
+public Todo create(Authentication auth, @RequestBody TodoRequest req) {
+    return todoService.create(auth.getName(), req);
+}
+```
+WHAT HAPPENS:
+- Authentication object contains user email (from JWT token)
+- Calls todoService.create() with user email and todo data
+
+File: TodoService.java
+```java
+public Todo create(String userEmail, TodoRequest req) {
+    User user = userRepository.findByEmail(userEmail).orElseThrow();
+    
+    Todo todo = new Todo();
+    todo.setTitle(req.getTitle());
+    todo.setDescription(req.getDescription());
+    todo.setDueDate(req.getDueDate());
+    todo.setUser(user);
+    todo.setCompleted(false);
+    
+    return todoRepository.save(todo);
+}
+```
+WHAT HAPPENS:
+1. Finds user by email (from JWT token)
+2. Creates new Todo object
+3. Sets all the fields from the request
+4. Links todo to the user
+5. Saves to database using repository
+6. Returns the saved todo (with database-generated ID)
+
+STEP 10: TODO IS SAVED TO DATABASE
+──────────────────────────────────
+
+File: Todo.java (Entity)
+```java
+@Entity
+@Table(name = "todos")
+public class Todo {
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
+    
+    @Column(nullable = false)
+    private String title;
+    
+    // ... other fields
+}
+```
+WHAT HAPPENS:
+- @Entity tells JPA this class represents a database table
+- @Id marks the primary key field
+- @GeneratedValue means database will auto-generate the ID
+- @ManyToOne creates foreign key relationship to users table
+- @JsonIgnore prevents user object from being included in JSON response
+- When todoRepository.save() is called, JPA generates SQL INSERT statement
+
+Generated SQL:
+```sql
+INSERT INTO todos (user_id, title, description, due_date, completed, created_at, updated_at)
+VALUES (1, 'Buy milk', 'Get milk from store', '2025-09-02 18:00:00', false, NOW(), NOW());
+```
+
+====================================================================================================
+9. HOW EVERYTHING WORKS TOGETHER
+====================================================================================================
+
+DATA FLOW SUMMARY:
+
+1. USER INTERACTION:
+   User types in browser → React components update → State changes → UI re-renders
+
+2. CLIENT-SERVER COMMUNICATION:
+   React → HTTP request → Spring Boot → Database query → Response back to React
+
+3. AUTHENTICATION:
+   Login → JWT token → Stored locally → Sent with every request → Server validates
+
+4. REAL-TIME UPDATES:
+   Add todo → Save to database → Reload list → UI shows new todo
+
+SECURITY LAYERS:
+
+1. FRONTEND:
+   - PrivateRoute prevents accessing pages without login
+   - Token stored in localStorage
+   - Automatic logout if token expires
+
+2. BACKEND:
+   - JWT token validation on every request
+   - Password hashing with BCrypt
+   - CORS configuration to allow only specific origins
+   - Input validation
+
+3. DATABASE:
+   - User isolation (users only see their own todos)
+   - Foreign key constraints maintain data integrity
+
+ERROR HANDLING:
+
+1. FRONTEND:
+   - Try-catch blocks around API calls
+   - Error states in components
+   - User-friendly error messages
+
+2. BACKEND:
+   - Exception handling for common errors
+   - Validation annotations
+   - Proper HTTP status codes
+
+3. DATABASE:
+   - Constraints to prevent invalid data
+   - Transactions to ensure data consistency
+
+====================================================================================================
+10. COMMON ISSUES AND SOLUTIONS
+====================================================================================================
+
+ISSUE: "Cannot read property of undefined"
+CAUSE: Trying to access data that hasn't loaded yet
+SOLUTION: Use optional chaining (todo?.title) or check if data exists
+
+ISSUE: CORS error when calling API
+CAUSE: Backend not configured to allow frontend domain
+SOLUTION: Add CORS configuration in SecurityConfig.java
+
+ISSUE: 401 Unauthorized error
+CAUSE: JWT token expired or invalid
+SOLUTION: Check token format, expiration, and secret key
+
+ISSUE: Todos not displaying properly
+CAUSE: Circular reference in JSON serialization
+SOLUTION: Add @JsonIgnore to prevent infinite loops
+
+ISSUE: Database connection failed
+CAUSE: MariaDB not running or wrong credentials
+SOLUTION: Check database server status and connection settings
+
+ISSUE: "npm ERR!" or dependency issues
+CAUSE: Package conflicts or outdated dependencies
+SOLUTION: Delete node_modules, run npm install again
+
+ISSUE: Java compilation errors
+CAUSE: Missing imports or syntax errors
+SOLUTION: Check imports, fix syntax, restart IDE
+
+====================================================================================================
+DEVELOPMENT WORKFLOW
+====================================================================================================
+
+STARTING THE APPLICATION:
+
+1. Start Database:
+   - Ensure MariaDB is running
+   - Database: todo_app
+   - Tables: users, todos
+
+2. Start Backend:
+   ```bash
+   cd todo-backend
+   mvn spring-boot:run
+   ```
+   - Runs on http://localhost:8080
+   - Check console for any errors
+
+3. Start Frontend:
+   ```bash
+   cd todo-frontend
+   npm run dev
+   ```
+   - Runs on http://localhost:5174
+   - Opens browser automatically
+
+MAKING CHANGES:
+
+1. Frontend changes:
+   - Save file → Vite hot reloads → See changes immediately
+
+2. Backend changes:
+   - Save file → Restart Spring Boot → Changes take effect
+
+3. Database changes:
+   - Modify entity → Restart backend → JPA updates schema
+
+DEBUGGING:
+
+1. Frontend debugging:
+   - Browser DevTools → Console tab for errors
+   - Network tab to see API requests/responses
+   - React DevTools for component state
+
+2. Backend debugging:
+   - Check console logs
+   - Add System.out.println() for debugging
+   - Use IDE debugger with breakpoints
+
+3. Database debugging:
+   - Use database client to check data
+   - Look at generated SQL in console
+   - Check foreign key relationships
+
+====================================================================================================
+NEXT STEPS FOR LEARNING
+====================================================================================================
+
+NOW THAT YOU UNDERSTAND THE BASICS:
+
+1. FRONTEND:
+   - Learn more React hooks (useReducer, useMemo, useCallback)
+   - Study React Router for navigation
+   - Explore state management with Redux or Zustand
+   - Learn React testing with Jest and React Testing Library
+
+2. BACKEND:
+   - Understand Spring Boot auto-configuration
+   - Learn about Spring profiles (dev, prod)
+   - Study JPA relationships and queries
+   - Explore Spring Boot Actuator for monitoring
+
+3. FULL-STACK:
+   - Add real-time features with WebSockets
+   - Implement email verification
+   - Add file upload functionality
+   - Learn about caching with Redis
+   - Deploy to cloud platforms (AWS, Heroku)
+
+4. BEST PRACTICES:
+   - Write unit and integration tests
+   - Use environment variables for configuration
+   - Implement proper logging
+   - Learn about Docker for containerization
+   - Study CI/CD pipelines
+
+RESOURCES FOR CONTINUED LEARNING:
+- React official documentation
+- Spring Boot guides
+- FreeCodeCamp tutorials
+- YouTube coding channels
+- GitHub open source projects
+
+Remember: Programming is learned by doing. Try modifying the code, break things,
+fix them, and experiment with new features!
+
+====================================================================================================
+END OF DOCUMENTATION
+====================================================================================================

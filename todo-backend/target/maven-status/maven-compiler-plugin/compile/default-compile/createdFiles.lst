@@ -2,6 +2,7 @@ com\example\todo\controller\AuthController.class
 com\example\todo\model\Todo.class
 com\example\todo\security\JwtAuthenticationFilter.class
 com\example\todo\security\JwtService.class
+com\example\todo\payload\AuthResponse$UserInfo.class
 com\example\todo\payload\TodoRequest.class
 com\example\todo\config\ApplicationConfig.class
 com\example\todo\payload\RegisterRequest.class

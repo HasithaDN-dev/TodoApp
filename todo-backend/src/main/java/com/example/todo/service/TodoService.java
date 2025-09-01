@@ -5,7 +5,6 @@ import com.example.todo.model.User;
 import com.example.todo.payload.TodoRequest;
 import com.example.todo.repository.TodoRepository;
 import com.example.todo.repository.UserRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,12 +16,10 @@ import java.util.Map;
 public class TodoService {
     private final TodoRepository todoRepository;
     private final UserRepository userRepository;
-    private final JdbcTemplate jdbcTemplate;
 
-    public TodoService(TodoRepository todoRepository, UserRepository userRepository, JdbcTemplate jdbcTemplate) {
+    public TodoService(TodoRepository todoRepository, UserRepository userRepository) {
         this.todoRepository = todoRepository;
         this.userRepository = userRepository;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     private User requireUser(String email) {
@@ -70,12 +67,23 @@ public class TodoService {
     public Map<String, Object> completeOverdue(String email, String dueBeforeIso) {
         User u = requireUser(email);
         LocalDateTime dueBefore = LocalDateTime.parse(dueBeforeIso);
-        Map<String, Object> result = jdbcTemplate.queryForMap("CALL sp_complete_overdue_tasks(?, ?)", u.getId(), java.sql.Timestamp.valueOf(dueBefore));
-        return result;
+        
+        List<Todo> overdueTodos = todoRepository.findByUserAndDueDateBeforeAndCompletedFalse(u, dueBefore);
+        int affected = 0;
+        for (Todo todo : overdueTodos) {
+            todo.setCompleted(true);
+            todo.setUpdatedAt(LocalDateTime.now());
+            todoRepository.save(todo);
+            affected++;
+        }
+        
+        return Map.of("affected", affected);
     }
 
     public Map<String, Object> stats(String email) {
         User u = requireUser(email);
-        return jdbcTemplate.queryForMap("CALL sp_get_todo_stats(?)", u.getId());
+        long pending = todoRepository.countByUserAndCompletedFalse(u);
+        long done = todoRepository.countByUserAndCompletedTrue(u);
+        return Map.of("pending", pending, "done", done);
     }
 }
