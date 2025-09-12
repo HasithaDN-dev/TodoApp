@@ -1,12 +1,69 @@
-# React + Vite
+# TodoApp Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the React frontend for the TodoApp project. It provides a user interface for managing todos, authentication, and interacts with the backend API.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
+- User authentication (login/register)
+- Add, edit, delete, and view todos
+- Responsive UI with Tailwind CSS
+- Protected routes for authenticated users
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Getting Started (Local Development)
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+3. The app will be available at `http://localhost:5173` (default Vite port).
+
+---
+
+## Build for Production
+
+```bash
+npm run build
+```
+The production build will be output to the `dist/` folder.
+
+---
+
+## Containerization & Collaboration
+
+This app is fully containerized using Docker. Collaborators can run the frontend in a consistent environment without manual setup:
+
+### Build and Run with Docker
+```bash
+docker build -t todo-frontend .
+docker run -p 3000:80 todo-frontend
+```
+Or use Docker Compose for full-stack orchestration:
+```bash
+docker-compose up --build
+```
+
+### How Containerization Helps
+- Ensures all collaborators use the same Node.js, Nginx, and dependencies
+- No need to install Node.js or Nginx locally
+- Easy to deploy to cloud or other machines
+
+---
+
+## Project Structure
+- `src/` - React source code
+- `public/` - Static assets
+- `Dockerfile` - Container build instructions
+- `README.md` - This documentation
+
+---
+
+## License
+
+This project is open-source and available under the MIT License.

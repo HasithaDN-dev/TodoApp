@@ -14,6 +14,8 @@ TABLE OF CONTENTS:
 8. Step-by-Step Code Walkthrough
 9. How Everything Works Together
 10. Common Issues and Solutions
+11. Containerization & Collaboration
+12. Development Workflow (with Docker)
 
 ====================================================================================================
 1. WHAT IS THIS TODOAPP?
@@ -778,101 +780,65 @@ CAUSE: Missing imports or syntax errors
 SOLUTION: Check imports, fix syntax, restart IDE
 
 ====================================================================================================
-DEVELOPMENT WORKFLOW
+CONTAINERIZATION & COLLABORATION
 ====================================================================================================
 
-STARTING THE APPLICATION:
+WHAT IS CONTAINERIZATION?
+Containerization uses tools like Docker to package your app and its dependencies into isolated environments called containers. This ensures your app runs the same way on any machine or cloud platform.
 
-1. Start Database:
-   - Ensure MariaDB is running
-   - Database: todo_app
-   - Tables: users, todos
+BENEFITS FOR THIS TODOAPP:
+- Consistent setup for all collaborators (no more "works on my machine" issues)
+- Easy onboarding: just install Docker and run one command
+- No need to install Java, Node.js, MariaDB, etc. locally
+- Fast deployment to cloud or other servers
+- Isolation: each service (frontend, backend, database) runs in its own container
 
-2. Start Backend:
+DOCKER COMPOSE:
+Docker Compose lets you define and run multi-container apps. In this project, it orchestrates the backend and frontend containers together.
+
+QUICK START WITH DOCKER COMPOSE:
+1. Make sure Docker is installed and running
+2. In the project root, run:
    ```bash
-   cd todo-backend
-   mvn spring-boot:run
+   docker-compose up --build
    ```
-   - Runs on http://localhost:8080
-   - Check console for any errors
+3. Backend runs on http://localhost:8080
+   Frontend runs on http://localhost:3000
 
-3. Start Frontend:
+COLLABORATION TIPS:
+- Share your code and Dockerfiles; teammates can run the app instantly
+- Use environment variables for secrets and config
+- Update documentation when changing Docker setup
+- For cloud deployment, use the same Docker images
+
+TROUBLESHOOTING CONTAINERS:
+- If a container can't connect to the database, check host settings (use `host.docker.internal` for local DB)
+- Use `docker-compose logs` to view container output
+- Rebuild containers after changing code or dependencies: `docker-compose up --build`
+
+====================================================================================================
+UPDATED DEVELOPMENT WORKFLOW (WITH DOCKER)
+====================================================================================================
+
+STARTING THE APPLICATION WITH DOCKER:
+1. Make sure MariaDB (or XAMPP) is running and database `todo_app` exists
+2. In the project root, run:
    ```bash
-   cd todo-frontend
-   npm run dev
+   docker-compose up --build
    ```
-   - Runs on http://localhost:5174
-   - Opens browser automatically
+   - Backend: http://localhost:8080
+   - Frontend: http://localhost:3000
 
 MAKING CHANGES:
+- Edit code as usual
+- Rebuild containers if dependencies change
+- Use hot reload for frontend (Vite)
+- Use logs for debugging: `docker-compose logs backend` or `docker-compose logs frontend`
 
-1. Frontend changes:
-   - Save file → Vite hot reloads → See changes immediately
-
-2. Backend changes:
-   - Save file → Restart Spring Boot → Changes take effect
-
-3. Database changes:
-   - Modify entity → Restart backend → JPA updates schema
-
-DEBUGGING:
-
-1. Frontend debugging:
-   - Browser DevTools → Console tab for errors
-   - Network tab to see API requests/responses
-   - React DevTools for component state
-
-2. Backend debugging:
-   - Check console logs
-   - Add System.out.println() for debugging
-   - Use IDE debugger with breakpoints
-
-3. Database debugging:
-   - Use database client to check data
-   - Look at generated SQL in console
-   - Check foreign key relationships
-
-====================================================================================================
-NEXT STEPS FOR LEARNING
-====================================================================================================
-
-NOW THAT YOU UNDERSTAND THE BASICS:
-
-1. FRONTEND:
-   - Learn more React hooks (useReducer, useMemo, useCallback)
-   - Study React Router for navigation
-   - Explore state management with Redux or Zustand
-   - Learn React testing with Jest and React Testing Library
-
-2. BACKEND:
-   - Understand Spring Boot auto-configuration
-   - Learn about Spring profiles (dev, prod)
-   - Study JPA relationships and queries
-   - Explore Spring Boot Actuator for monitoring
-
-3. FULL-STACK:
-   - Add real-time features with WebSockets
-   - Implement email verification
-   - Add file upload functionality
-   - Learn about caching with Redis
-   - Deploy to cloud platforms (AWS, Heroku)
-
-4. BEST PRACTICES:
-   - Write unit and integration tests
-   - Use environment variables for configuration
-   - Implement proper logging
-   - Learn about Docker for containerization
-   - Study CI/CD pipelines
-
-RESOURCES FOR CONTINUED LEARNING:
-- React official documentation
-- Spring Boot guides
-- FreeCodeCamp tutorials
-- YouTube coding channels
-- GitHub open source projects
-
-Remember: Programming is learned by doing. Try modifying the code, break things,
-fix them, and experiment with new features!
+COLLABORATION:
+- All teammates use the same workflow
+- No manual setup required
+- Easy to deploy to cloud or other machines
 
 ====================================================================================================
 END OF DOCUMENTATION
