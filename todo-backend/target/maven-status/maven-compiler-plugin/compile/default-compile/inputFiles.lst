@@ -1,6 +1,7 @@
 C:\Users\Hasitha\Documents\Java\TodoApp\todo-backend\src\main\java\com\example\todo\config\ApplicationConfig.java
 C:\Users\Hasitha\Documents\Java\TodoApp\todo-backend\src\main\java\com\example\todo\config\SecurityConfig.java
 C:\Users\Hasitha\Documents\Java\TodoApp\todo-backend\src\main\java\com\example\todo\controller\AuthController.java
+C:\Users\Hasitha\Documents\Java\TodoApp\todo-backend\src\main\java\com\example\todo\controller\HealthController.java
 C:\Users\Hasitha\Documents\Java\TodoApp\todo-backend\src\main\java\com\example\todo\controller\TodoController.java
 C:\Users\Hasitha\Documents\Java\TodoApp\todo-backend\src\main\java\com\example\todo\model\Todo.java
 C:\Users\Hasitha\Documents\Java\TodoApp\todo-backend\src\main\java\com\example\todo\model\User.java
